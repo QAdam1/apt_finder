@@ -12,7 +12,7 @@ A monorepo containing microservices for ingesting Facebook rental posts, normali
    ```bash
    python -m venv .venv
    source .venv/bin/activate
-   pip install -r requirements.txt
+   make install   # installs requirements.txt
    ```
 
 2. **Configure environment** (`.env`)
@@ -32,19 +32,19 @@ A monorepo containing microservices for ingesting Facebook rental posts, normali
 
 3. **Initialize Mongo indexes**
    ```bash
-   python scripts/setup_mongo.py
+   make mongo-setup
    ```
 
 4. **Run the API service**
    ```bash
-   uvicorn services.api.app.main:app --reload
+   make api
    ```
    - Base URL: `http://127.0.0.1:8000`
    - Example: `POST /search/listings` with `{"query": "2 bedroom in Tel Aviv", "limit": 10}`.
 
 5. **Run the scraper service (alongside the API)**
    ```bash
-   python services/scraper/main.py
+   make scraper
    ```
    - Uses `FACEBOOK_*` env vars for credentials and group id.
    - Scrapes once on startup, then polls every `FACEBOOK_POLL_INTERVAL_SECONDS` seconds.
