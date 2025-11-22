@@ -6,3 +6,4 @@ pydantic-settings
 openai
 python-dotenv
 facebook-scraper
+lxml[html_clean]

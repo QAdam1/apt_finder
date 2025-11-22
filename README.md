@@ -75,3 +75,5 @@ requirements.txt
 - The vector index expected by the API is `listing_embedding_index` on `listings.embedding`.
 - The scraper tolerates duplicate insert attempts when posts already exist.
 - Both services rely on the shared `.env` configuration in the repository root.
+- The `facebook-scraper` dependency requires `lxml[html_clean]`, which is included in `requirements.txt`; ensure your environment
+  installs wheels or build dependencies for `lxml`.
