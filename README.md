@@ -49,6 +49,16 @@ A monorepo containing microservices for ingesting Facebook rental posts, normali
    - Uses `FACEBOOK_*` env vars for credentials and group id.
    - Scrapes once on startup, then polls every `FACEBOOK_POLL_INTERVAL_SECONDS` seconds.
 
+### If `make` is unavailable (e.g., on Windows shells)
+Run the equivalent commands manually from the repo root (after activating your virtualenv):
+```bash
+python -m pip install -r requirements.txt
+python scripts/setup_mongo.py
+uvicorn services.api.app.main:app --reload
+# In another shell if desired
+python services/scraper/main.py
+```
+
 ## Repository layout
 ```
 services/
