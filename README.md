@@ -7,12 +7,10 @@ A monorepo containing microservices for ingesting Facebook rental posts, normali
 - **Scraper** (`services/scraper`): Polls Facebook groups using [`facebook-scraper`](https://github.com/kevinzg/facebook-scraper) and stores raw posts in MongoDB.
 - **Common** (`services/common`): Shared configuration, MongoDB client, models, and embedding helper.
 
-## Quickstart
+## Quickstart (with Makefile)
 1. **Create virtualenv + install deps**
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate
-   make install   # installs requirements.txt
+   make install   # creates .venv (Python 3) and installs requirements into it
    ```
 
 2. **Configure environment** (`.env`)
@@ -49,9 +47,17 @@ A monorepo containing microservices for ingesting Facebook rental posts, normali
    - Uses `FACEBOOK_*` env vars for credentials and group id.
    - Scrapes once on startup, then polls every `FACEBOOK_POLL_INTERVAL_SECONDS` seconds.
 
+6. **Clean the virtualenv (optional)**
+   ```bash
+   make clean
+   ```
+
 ### If `make` is unavailable (e.g., on Windows shells)
 Run the equivalent commands manually from the repo root (after activating your virtualenv):
 ```bash
+python -m venv .venv
+# POSIX: source .venv/bin/activate
+# Windows: .venv\Scripts\activate
 python -m pip install -r requirements.txt
 python scripts/setup_mongo.py
 uvicorn services.api.app.main:app --reload
@@ -85,5 +91,4 @@ requirements.txt
 - The vector index expected by the API is `listing_embedding_index` on `listings.embedding`.
 - The scraper tolerates duplicate insert attempts when posts already exist.
 - Both services rely on the shared `.env` configuration in the repository root.
-- The `facebook-scraper` dependency requires `lxml[html_clean]`, which is included in `requirements.txt`; ensure your environment
-  installs wheels or build dependencies for `lxml`.
+- The `facebook-scraper` dependency requires `lxml[html_clean]`, which is included in `requirements.txt`; ensure your environment installs wheels or build dependencies for `lxml`.
