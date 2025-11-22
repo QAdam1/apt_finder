@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -14,17 +15,16 @@ if str(ROOT_DIR) not in sys.path:
 from app.db.mongo import close_mongo_connection, connect_to_mongo
 from app.routers import search as search_router
 
-app = FastAPI(title="AI Apartment Hunter")
 
-
-@app.on_event("startup")
-async def startup_event() -> None:
+@asynccontextmanager
+async def lifespan(_: FastAPI):
     await connect_to_mongo()
+    try:
+        yield
+    finally:
+        await close_mongo_connection()
 
 
-@app.on_event("shutdown")
-async def shutdown_event() -> None:
-    await close_mongo_connection()
-
+app = FastAPI(title="AI Apartment Hunter", lifespan=lifespan)
 
 app.include_router(search_router.router)
