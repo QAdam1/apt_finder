@@ -42,13 +42,16 @@ async def create_listings_indexes(db: Any) -> None:
                     {
                         "name": VECTOR_INDEX_NAME,
                         "definition": {
-                            "fields": {
-                                "embedding": {
-                                    "type": "vector",
-                                    "path": "embedding",
-                                    "numDimensions": EMBEDDING_DIMENSIONS,
-                                    "similarity": "cosine",
-                                }
+                            "mappings": {
+                                "dynamic": True,
+                                "fields": {
+                                    "embedding": {
+                                        "type": "vector",
+                                        "path": "embedding",
+                                        "numDimensions": EMBEDDING_DIMENSIONS,
+                                        "similarity": "cosine",
+                                    }
+                                },
                             }
                         },
                     }
