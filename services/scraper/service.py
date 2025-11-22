@@ -2,11 +2,18 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from facebook_scraper import get_posts
 from pymongo.errors import BulkWriteError
+
+# Ensure repository root is on sys.path for direct execution.
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from services.common.config import settings
 from services.common.db import get_database
