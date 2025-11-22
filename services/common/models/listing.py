@@ -7,7 +7,7 @@ from typing import List, Optional
 from bson import ObjectId
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.post_raw import PyObjectId
+from services.common.models.post_raw import PyObjectId
 
 
 class Coordinates(BaseModel):

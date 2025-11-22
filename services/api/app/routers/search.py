@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.schemas.search import SearchListingsRequest, SearchListingsResponse
-from app.services.listings_search import search_listings
+from services.api.app.schemas.search import SearchListingsRequest, SearchListingsResponse
+from services.api.app.services.listings_search import search_listings
 
 router = APIRouter(prefix="/search", tags=["search"])
 

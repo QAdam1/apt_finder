@@ -3,30 +3,39 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from facebook_scraper import get_posts
 from pymongo.errors import BulkWriteError
 
-from app.db.mongo import get_database
-from app.models.post_raw import PostRaw, RawContent, SourceInfo
+from services.common.config import settings
+from services.common.db import get_database
+from services.common.models.post_raw import PostRaw, RawContent, SourceInfo
 
 
 async def _collect_posts(
-    group: str, pages: int, cookies: Optional[str], request_kwargs: Dict[str, object]
+    group: str,
+    pages: int,
+    credentials: Optional[Tuple[str, str]],
+    request_kwargs: Dict[str, object],
 ) -> List[Dict[str, object]]:
     """Collect posts from facebook-scraper in a thread executor."""
 
     def _fetch() -> List[Dict[str, object]]:
-        return list(get_posts(group=group, pages=pages, cookies=cookies, **request_kwargs))
+        return list(
+            get_posts(
+                group=group,
+                pages=pages,
+                credentials=credentials,
+                **request_kwargs,
+            )
+        )
 
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _fetch)
 
 
-def _map_to_post_raw(
-    raw_post: Dict[str, object], group: str, group_name: Optional[str]
-) -> PostRaw:
+def _map_to_post_raw(raw_post: Dict[str, object], group: str, group_name: Optional[str]) -> PostRaw:
     """Map facebook-scraper dict to PostRaw model."""
     images: List[str] = []
     if raw_post.get("images"):
@@ -58,12 +67,12 @@ async def scrape_group_posts(
     group: str,
     *,
     pages: int = 1,
-    cookies: Optional[str] = None,
+    credentials: Optional[Tuple[str, str]] = None,
     group_name: Optional[str] = None,
     request_kwargs: Optional[Dict[str, object]] = None,
 ) -> List[PostRaw]:
     """Scrape posts from a Facebook group and return PostRaw objects."""
-    raw_posts = await _collect_posts(group, pages, cookies, request_kwargs or {})
+    raw_posts = await _collect_posts(group, pages, credentials, request_kwargs or {})
     return [_map_to_post_raw(raw_post, group, group_name) for raw_post in raw_posts]
 
 
@@ -84,3 +93,29 @@ async def persist_raw_posts(posts: Iterable[PostRaw]) -> List[str]:
         inserted_ids = [str(doc.get("_id")) for doc in exc.details.get("writeErrors", []) if doc]
 
     return inserted_ids
+
+
+async def scrape_and_store_once() -> List[str]:
+    """Scrape configured group once and persist results."""
+    if not settings.facebook_group_id:
+        raise ValueError("FACEBOOK_GROUP_ID is required to run the scraper service.")
+
+    credentials: Optional[Tuple[str, str]] = None
+    if settings.facebook_email and settings.facebook_password:
+        credentials = (settings.facebook_email, settings.facebook_password)
+
+    posts = await scrape_group_posts(
+        settings.facebook_group_id,
+        pages=settings.facebook_pages,
+        credentials=credentials,
+        group_name=None,
+        request_kwargs=settings.facebook_request_kwargs,
+    )
+    return await persist_raw_posts(posts)
+
+
+async def poll_and_store(interval_seconds: int) -> None:
+    """Continuously poll the configured group and store new posts."""
+    while True:
+        await scrape_and_store_once()
+        await asyncio.sleep(interval_seconds)

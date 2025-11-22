@@ -1,7 +1,7 @@
-"""MongoDB connection management using Motor."""
+"""MongoDB connection management using Motor for all services."""
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
-from app.core.config import settings
+from services.common.config import settings
 
 
 client: AsyncIOMotorClient | None = None

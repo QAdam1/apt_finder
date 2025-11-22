@@ -9,7 +9,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from app.db.mongo import close_mongo_connection, connect_to_mongo, get_database
+from services.common.db import close_mongo_connection, connect_to_mongo, get_database
 
 
 EMBEDDING_DIMENSIONS = 1536

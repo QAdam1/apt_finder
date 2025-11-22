@@ -3,14 +3,14 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from app.db.mongo import get_database
-from app.schemas.search import (
+from services.common.db import get_database
+from services.common.services.embedding import embed_text
+from services.api.app.schemas.search import (
     ListingFilters,
     ListingSummary,
     SearchListingsRequest,
     SearchListingsResponse,
 )
-from app.services.embedding import embed_text
 
 
 VECTOR_INDEX_NAME = "listing_embedding_index"

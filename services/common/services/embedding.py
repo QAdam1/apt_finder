@@ -6,7 +6,7 @@ from typing import List
 
 from openai import OpenAI
 
-from app.core.config import settings
+from services.common.config import settings
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 

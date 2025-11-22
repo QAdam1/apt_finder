@@ -8,12 +8,12 @@ from pathlib import Path
 from fastapi import FastAPI
 
 # Ensure repository root is on sys.path when running as a script.
-ROOT_DIR = Path(__file__).resolve().parents[1]
+ROOT_DIR = Path(__file__).resolve().parents[3]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from app.db.mongo import close_mongo_connection, connect_to_mongo
-from app.routers import search as search_router
+from services.common.db import close_mongo_connection, connect_to_mongo
+from services.api.app.routers import search as search_router
 
 
 @asynccontextmanager
