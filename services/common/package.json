@@ -1,0 +1,13 @@
+{
+  "name": "@apt/common",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mongodb": "^6.8.0",
+    "openai": "^4.59.0",
+    "zod": "^3.23.8"
+  }
+}

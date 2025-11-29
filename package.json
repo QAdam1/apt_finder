@@ -1,0 +1,15 @@
+{
+  "name": "apt-finder-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "services/common",
+    "services/api",
+    "services/scraper"
+  ],
+  "scripts": {
+    "lint": "echo 'no lint configured'",
+    "test": "echo 'no tests yet'",
+    "setup:mongo": "node scripts/setup_mongo.js"
+  }
+}

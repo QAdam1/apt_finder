@@ -1,0 +1,14 @@
+{
+  "name": "@apt/scraper",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@apt/common": "^1.0.0",
+    "python-shell": "^5.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  }
+}

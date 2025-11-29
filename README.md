@@ -1,94 +1,73 @@
-# AI Apartment Hunter Monorepo
+# AI Apartment Hunter (Node.js Monorepo)
 
-A monorepo containing microservices for ingesting Facebook rental posts, normalizing them into structured listings with embeddings, and exposing search APIs.
+This repo hosts two Node.js microservices plus shared utilities:
 
-## Services
-- **API** (`services/api`): FastAPI app exposing listing search endpoints backed by MongoDB + Atlas Vector Search.
-- **Scraper** (`services/scraper`): Polls Facebook groups using [`facebook-scraper`](https://github.com/kevinzg/facebook-scraper) and stores raw posts in MongoDB.
-- **Common** (`services/common`): Shared configuration, MongoDB client, models, and embedding helper.
+- **API** (`services/api`): Fastify server exposing `/search/listings`.
+- **Scraper** (`services/scraper`): polls Facebook groups via the `facebook-scraper` Python package and stores posts in MongoDB.
+- **Common** (`services/common`): shared config, Mongo, embeddings, and helpers.
 
-## Quickstart (with Makefile)
-1. **Create virtualenv + install deps**
-   ```bash
-   make install   # creates .venv (Python 3) and installs requirements into it
-   ```
+## Requirements
 
-2. **Configure environment** (`.env`)
-   ```bash
-   cat > .env <<'ENV'
-   MONGO_URI=mongodb+srv://<user>:<pass>@<cluster>/<db>?retryWrites=true&w=majority
-   MONGO_DB_NAME=apt_finder
-   OPENAI_API_KEY=<your_openai_key>
-   # Scraper
-   FACEBOOK_EMAIL=<fb_email>
-   FACEBOOK_PASSWORD=<fb_password>
-   FACEBOOK_GROUP_ID=<facebook_group_numeric_id_or_handle>
-   FACEBOOK_PAGES=1
-   FACEBOOK_POLL_INTERVAL_SECONDS=900
-   ENV
-   ```
+- Node.js 18+
+- Python 3 (for the facebook-scraper helper)
+- MongoDB (Atlas or local) with a vector index named `listing_embedding_index` on `listings.embedding`.
 
-3. **Initialize Mongo indexes**
-   ```bash
-   make mongo-setup
-   ```
+Install the Python dependency:
 
-4. **Run the API service**
-   ```bash
-   make api
-   ```
-   - Base URL: `http://127.0.0.1:8000`
-   - Example: `POST /search/listings` with `{"query": "2 bedroom in Tel Aviv", "limit": 10}`.
-
-5. **Run the scraper service (alongside the API)**
-   ```bash
-   make scraper
-   ```
-   - Uses `FACEBOOK_*` env vars for credentials and group id.
-   - Scrapes once on startup, then polls every `FACEBOOK_POLL_INTERVAL_SECONDS` seconds.
-
-6. **Clean the virtualenv (optional)**
-   ```bash
-   make clean
-   ```
-
-### If `make` is unavailable (e.g., on Windows shells)
-Run the equivalent commands manually from the repo root (after activating your virtualenv):
 ```bash
-python -m venv .venv
-# POSIX: source .venv/bin/activate
-# Windows: .venv\Scripts\activate
-python -m pip install -r requirements.txt
-python scripts/setup_mongo.py
-uvicorn services.api.app.main:app --reload
-# In another shell if desired
-python services/scraper/main.py
+pip install facebook-scraper
 ```
 
-## Repository layout
-```
-services/
-  api/            # FastAPI microservice
-    app/
-      main.py
-      routers/search.py
-      schemas/search.py
-      services/listings_search.py
-  scraper/        # Facebook scraping microservice
-    main.py
-    service.py
-  common/         # Shared code
-    config.py
-    db.py
-    models/
-    services/embedding.py
-scripts/
-  setup_mongo.py  # Creates indexes including the Atlas vector index
-requirements.txt
+## Installation
+
+```bash
+npm install
 ```
 
-## Notes
-- The vector index expected by the API is `listing_embedding_index` on `listings.embedding`.
-- The scraper tolerates duplicate insert attempts when posts already exist.
-- Both services rely on the shared `.env` configuration in the repository root.
-- The `facebook-scraper` dependency requires `lxml[html_clean]`, which is included in `requirements.txt`; ensure your environment installs wheels or build dependencies for `lxml`.
+The root `package.json` uses npm workspaces to install dependencies for all services.
+
+## Environment
+
+Create `.env` in the repository root:
+
+```
+MONGO_URI=mongodb+srv://...
+MONGO_DB_NAME=apt_finder
+OPENAI_API_KEY=sk-...
+SCRAPER_GROUP_ID=your_facebook_group_id
+SCRAPER_EMAIL=your_email
+SCRAPER_PASSWORD=your_password
+SCRAPER_INTERVAL_SECONDS=300
+```
+
+## Running the API
+
+```bash
+npm run --workspace services/api start
+```
+
+The API listens on `PORT` (default 8000) and exposes `POST /search/listings`.
+
+## Running the scraper
+
+```bash
+npm run --workspace services/scraper start
+```
+
+The scraper triggers immediately and then every `SCRAPER_INTERVAL_SECONDS` seconds. It inserts into `posts_raw`, ignoring duplicate post IDs.
+
+## Mongo indexes
+
+Create the indexes (including the Atlas vector index) via the Node helper:
+
+```bash
+npm run setup:mongo
+```
+
+## Manual search request
+
+```bash
+curl -X POST http://localhost:8000/search/listings \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"2 bedroom in Tel Aviv","limit":5}'
+```
